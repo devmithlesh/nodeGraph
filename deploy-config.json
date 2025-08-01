@@ -1,0 +1,50 @@
+{
+  "name": "react-flow-node-editor",
+  "version": "1.0.0",
+  "description": "Interactive node editor with React Flow and auto-layout",
+  "build": {
+    "output": "dist",
+    "assets": "dist/assets",
+    "html": "dist/index.html"
+  },
+  "deployment": {
+    "netlify": {
+      "buildCommand": "npm run build",
+      "publishDirectory": "dist",
+      "redirects": [
+        {
+          "from": "/*",
+          "to": "/index.html",
+          "status": 200
+        }
+      ]
+    },
+    "vercel": {
+      "buildCommand": "npm run build",
+      "outputDirectory": "dist",
+      "rewrites": [
+        {
+          "source": "/(.*)",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    "github-pages": {
+      "buildCommand": "npm run build",
+      "publishDirectory": "dist",
+      "basePath": "/react-flow-node-editor"
+    }
+  },
+  "features": {
+    "autoLayout": true,
+    "nodeSelection": true,
+    "nodeDetails": true,
+    "addChildNodes": true,
+    "deleteNodes": true,
+    "customComponents": true,
+    "uniqueIds": true,
+    "zoomControls": true,
+    "connectionValidation": true,
+    "visualFeedback": true
+  }
+} 

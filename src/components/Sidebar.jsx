@@ -2,7 +2,7 @@ import React from 'react'
 import { useNodeStore } from '../store/nodeStore'
 
 export default function Sidebar() {
-  const { addNode, nodes = [], edges = [] } = useNodeStore();
+  const { addNode, nodes = [], edges = [], createSampleData, clearAll } = useNodeStore();
 
   const addAccountNode = () => {
     addNode('account');
@@ -13,7 +13,7 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="w-80 p-4 bg-white shadow-lg border-r border-gray-200">
+    <div className="w-80 p-4 bg-white shadow-lg border-r border-gray-200 overflow-y-auto">
       <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-800 mb-2 flex items-center">
           🌳 Node Editor
@@ -71,6 +71,24 @@ export default function Sidebar() {
         </div>
       </div>
 
+      <div className="mb-6">
+        <h3 className="font-semibold text-gray-700 mb-3">Actions</h3>
+        <div className="space-y-2">
+          <button 
+            onClick={createSampleData}
+            className="w-full bg-purple-50 hover:bg-purple-100 border border-purple-200 px-4 py-2 text-sm rounded-lg transition-colors text-purple-800"
+          >
+            📊 Load Sample Data
+          </button>
+          <button 
+            onClick={clearAll}
+            className="w-full bg-red-50 hover:bg-red-100 border border-red-200 px-4 py-2 text-sm rounded-lg transition-colors text-red-800"
+          >
+            🗑️ Clear All
+          </button>
+        </div>
+      </div>
+
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
         <h4 className="font-medium text-amber-800 mb-2 flex items-center">
           💡 Quick Tips
@@ -79,6 +97,7 @@ export default function Sidebar() {
           <li>• Click any node to view details and add children</li>
           <li>• Use the side panel to manage node relationships</li>
           <li>• Delete nodes removes all descendants</li>
+          <li>• Auto-layout is applied automatically</li>
         </ul>
       </div>
     </div>

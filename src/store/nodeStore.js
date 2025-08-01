@@ -59,16 +59,92 @@ export const useNodeStore = create((set, get) => ({
 
   setLayoutedElements: ({ nodes, edges }) => set({ nodes, edges }),
 
+  applyAutoLayout: () => {
+    const { nodes, edges } = get();
+    console.log('Applying auto-layout to:', nodes.length, 'nodes and', edges.length, 'edges');
+    const layouted = getLayoutedElements(nodes, edges);
+    set({ nodes: layouted.nodes, edges: layouted.edges });
+  },
+
   onNodesChange: (changes) => {
-    set({
-      nodes: applyNodeChanges(changes, get().nodes),
-    });
+    const updatedNodes = applyNodeChanges(changes, get().nodes);
+    set({ nodes: updatedNodes });
   },
 
   onEdgesChange: (changes) => {
     set({
       edges: applyEdgeChanges(changes, get().edges),
     });
+  },
+
+  onConnect: (connection) => {
+    const { source, target } = connection;
+    
+    // Validate the connection based on node rules
+    const sourceNode = get().nodes.find(n => n.id === source);
+    const targetNode = get().nodes.find(n => n.id === target);
+    
+    if (!sourceNode || !targetNode) {
+      console.error('Source or target node not found');
+      return;
+    }
+    
+    // Extract base types
+    const sourceType = sourceNode.type.replace('Node', '').toLowerCase();
+    const targetType = targetNode.type.replace('Node', '').toLowerCase();
+    
+    // Check if this connection is allowed
+    // source -> target means source can have target as a child
+    const allowedChildren = allowedChildMap[sourceType] || [];
+    if (!allowedChildren.includes(targetType)) {
+      console.error(`Connection not allowed: ${sourceType} -> ${targetType}`);
+      alert(`Cannot connect ${sourceType} to ${targetType}. Allowed connections from ${sourceType}: ${allowedChildren.join(', ')}`);
+      return;
+    }
+    
+    // Check if target already has a parent
+    const targetHasParent = get().edges.some(edge => edge.target === target);
+    if (targetHasParent) {
+      console.error('Target node already has a parent');
+      alert('This node already has a parent connection');
+      return;
+    }
+    
+    // Check if we're trying to connect a node to itself
+    if (source === target) {
+      console.error('Cannot connect a node to itself');
+      alert('Cannot connect a node to itself');
+      return;
+    }
+    
+    const newEdge = {
+      id: `${source}-${target}`,
+      source,
+      target,
+      type: 'smoothstep',
+      animated: true,
+      style: {
+        stroke: '#6366f1',
+        strokeWidth: 3,
+        filter: 'drop-shadow(0 2px 4px rgba(99, 102, 241, 0.2))',
+      },
+      markerEnd: {
+        type: 'arrowclosed',
+        color: '#6366f1',
+        width: 20,
+        height: 20,
+      },
+    };
+    
+    const updatedEdges = [...get().edges, newEdge];
+    set({ edges: updatedEdges });
+    
+    // Apply auto-layout after connection
+    setTimeout(() => {
+      const { nodes, edges } = get();
+      const layouted = getLayoutedElements(nodes, edges);
+      set({ nodes: layouted.nodes, edges: layouted.edges });
+    }, 100);
   },
 
   connectNodes: (source, target) => {
@@ -156,7 +232,7 @@ export const useNodeStore = create((set, get) => ({
         }
       : null;
 
-    const updatedNodes = [...get().nodes, newNode];
+        const updatedNodes = [...get().nodes, newNode];
     const updatedEdges = newEdge ? [...get().edges, newEdge] : get().edges;
     const layouted = getLayoutedElements(updatedNodes, updatedEdges);
     set({ nodes: layouted.nodes, edges: layouted.edges });
@@ -193,7 +269,7 @@ export const useNodeStore = create((set, get) => ({
     const sampleNodes = [
       {
         id: 'account-1',
-        type: 'account',
+        type: 'accountNode',
         data: { 
           label: 'Account',
           id: 'account-1',
@@ -204,7 +280,7 @@ export const useNodeStore = create((set, get) => ({
       },
       {
         id: 'loan-1',
-        type: 'loan',
+        type: 'loanNode',
         data: { 
           label: 'Loan',
           id: 'loan-1',
@@ -215,7 +291,7 @@ export const useNodeStore = create((set, get) => ({
       },
       {
         id: 'collateral-1',
-        type: 'collateral',
+        type: 'collateralNode',
         data: { 
           label: 'Collateral',
           id: 'collateral-1',
